@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - HomeServe</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 { margin-bottom: 0.5rem; }
+        
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-bottom: 2rem;
+        }
+        
+        .booking-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+        .booking-id {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .status-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #d1ecf1; color: #0c5460; }
+        .status-completed { background: #d4edda; color: #155724; }
+        
+        .booking-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .detail-item {
+            margin-bottom: 0.8rem;
+        }
+        .detail-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.2rem;
+        }
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .review-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 10px;
+        }
+        .empty-state h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 My Bookings</h1>
+        <p>Track all your service bookings</p>
+    </div>
+
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Home</a>
+        
+        <div id="bookingsList"></div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+        
+        async function loadMyBookings() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email') || prompt('Enter your email:');
+            
+            if (!email) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API}/bookings/user/${email}`);
+                const bookings = await res.json();
+                
+                const container = document.getElementById('bookingsList');
+                
+                if (bookings.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h2>No Bookings Yet</h2>
+                            <p>You haven't made any bookings. Start by booking a service!</p>
+                            <a href="index.html#booking" class="review-btn">Book a Service</a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = bookings.map(b => `
+                    <div class="booking-card">
+                        <div class="booking-header">
+                            <div>
+                                <h3>${b.service}</h3>
+                                <p class="booking-id">Booking ID: ${b._id.substring(0, 12)}</p>
+                            </div>
+                            <span class="status-badge status-${b.status}">${b.status.toUpperCase()}</span>
+                        </div>
+                        <div class="booking-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Date & Time</div>
+                                <div class="detail-value">${b.date} at ${b.time}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Technician</div>
+                                <div class="detail-value">${b.technician || 'To be assigned'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Amount</div>
+                                <div class="detail-value">₹${b.amount}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Payment Status</div>
+                                <div class="detail-value">${b.paymentStatus}</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <strong>Address:</strong> ${b.address}
+                        </div>
+                        ${b.status === 'completed' ? `
+                            <button class="review-btn" onclick="leaveReview('${b.technician}', '${b._id}')">
+                                ⭐ Leave a Review
+                            </button>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load bookings');
+            }
+        }
+        
+        function leaveReview(techName, bookingId) {
+            const rating = prompt('Rate the service (1-5 stars):');
+            const comment = prompt('Leave a comment:');
+            
+            if (rating && comment) {
+                fetch(`${API}/reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bookingId,
+                        technicianName: techName,
+                        userName: 'Customer',
+                        rating: parseInt(rating),
+                        comment
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Thank you for your review!');
+                    }
+                });
+            }
+        }
+        
+        loadMyBookings();
+    </script>
+</body>
+</html>

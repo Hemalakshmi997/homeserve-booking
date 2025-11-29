@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeServe - Professional Home Services</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+        .nav-links a:hover { opacity: 0.8; }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 1rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 50px;
+        }
+        .search-box input {
+            flex: 1;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 50px;
+        }
+        .search-box input:focus { outline: none; }
+        .search-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .search-btn:hover { opacity: 0.9; }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #667eea;
+        }
+        
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .service-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+        .service-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+        .service-card h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        .service-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .price-tag {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            margin-top: 0.5rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        /* Technicians Grid */
+        .technicians-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .technician-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .technician-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .tech-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .tech-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .tech-info h3 {
+            color: #333;
+            margin-bottom: 0.3rem;
+        }
+        .rating {
+            color: #ffc107;
+            font-size: 1.1rem;
+        }
+        .tech-details {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+        .tech-details p {
+            margin: 0.5rem 0;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .tech-details strong {
+            color: #667eea;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: opacity 0.3s;
+        }
+        .btn:hover { opacity: 0.9; }
+        
+        /* Booking Form */
+        .booking-form {
+            max-width: 700px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .price-display {
+            background: #f0f0f0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .price-display h3 {
+            color: #667eea;
+            font-size: 1.5rem;
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+            border-left: 4px solid #28a745;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+            border-left: 4px solid #dc3545;
+        }
+        
+        /* Footer */
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-top: 3rem;
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-content h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        .modal-content .booking-details {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: left;
+        }
+        .modal-content .booking-details p {
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                🏠 HomeServe
+            </div>
+            <ul class="nav-links">
+                <li><a href="#services">Services</a></li>
+                <li><a href="#technicians">Technicians</a></li>
+                <li><a href="#booking">Book Now</a></li>
+                <li><a href="#" onclick="viewMyBookings()">My Bookings</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>🏠 Professional Home Services at Your Doorstep</h1>
+        <p>Book trusted technicians for electrical, plumbing, AC repair, and more</p>
+        <div class="search-box">
+            <input type="text" id="locationInput" placeholder="Enter your city or area (e.g., Chennai, Mumbai)">
+            <button class="search-btn" onclick="searchByLocation()">🔍 Search</button>
+        </div>
+    </section>
+
+    <div class="container" id="services">
+        <h2 class="section-title">Our Services</h2>
+        <div class="services-grid" id="servicesGrid">
+            <div class="loading">Loading services...</div>
+        </div>
+    </div>
+
+    <div class="container" id="technicians">
+        <h2 class="section-title">Featured Technicians</h2>
+        <div class="technicians-grid" id="techniciansGrid">
+            <div class="loading">Loading technicians...</div>
+        </div>
+    </div>
+
+    <div class="container" id="booking">
+        <h2 class="section-title">Book Your Service</h2>
+        <div class="booking-form">
+            <div class="success-message" id="successMessage"></div>
+            <div class="error-message" id="errorMessage"></div>
+            
+            <form id="bookingForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Your Name *</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="email" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="tel" id="phone" required pattern="[0-9]{10}">
+                    </div>
+                    <div class="form-group">
+                        <label>Service Type *</label>
+                        <select id="service" required onchange="updatePrice()">
+                            <option value="">Select a service</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Preferred Technician (Optional)</label>
+                    <select id="technician">
+                        <option value="">Any available technician</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Preferred Date *</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Time *</label>
+                        <input type="time" id="time" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Service Address *</label>
+                    <textarea id="address" required placeholder="Enter full address with landmark"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Additional Details</label>
+                    <textarea id="details" placeholder="Describe your issue or requirements"></textarea>
+                </div>
+
+                <div class="price-display" id="priceDisplay" style="display: none;">
+                    <h3>Estimated Price: ₹<span id="priceAmount">0</span></h3>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Final price may vary based on actual work</p>
+                </div>
+
+                <button type="submit" class="btn">Confirm Booking & Proceed to Payment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <h2>🎉 Booking Confirmed!</h2>
+            <div class="booking-details">
+                <p><strong>Booking ID:</strong> <span id="modalBookingId"></span></p>
+                <p><strong>Service:</strong> <span id="modalService"></span></p>
+                <p><strong>Date & Time:</strong> <span id="modalDateTime"></span></p>
+                <p><strong>Amount:</strong> ₹<span id="modalAmount"></span></p>
+            </div>
+            <p style="margin: 1rem 0; color: #666;">We'll send you a confirmation email shortly. A technician will contact you soon!</p>
+            <button class="btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <h3>🏠 HomeServe</h3>
+            <p>Your trusted home service partner</p>
+            <div class="footer-links">
+                <a href="#">About Us</a>
+                <a href="#">Contact</a>
+                <a href="#">Terms</a>
+                <a href="#">Privacy</a>
+                <a href="#">Help</a>
+            </div>
+            <p style="margin-top: 1rem;">&copy; 2024 HomeServe. All rights reserved.</p>
+            <p>📞 +91 1234567890 | ✉️ info@homeserve.com</p>
+        </div>
+    </footer>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+        
+        const pricing = {
+            'Electrical': 500,
+            'Plumbing': 450,
+            'AC Repair': 600,
+            'Painting': 400,
+            'Carpentry': 450,
+            'Cleaning': 350
+        };
+
+        // Load services
+        async function loadServices() {
+            try {
+                const res = await fetch(`${API}/services`);
+                const services = await res.json();
+                
+                document.getElementById('servicesGrid').innerHTML = services.map(s => `
+                    <div class="service-card" onclick="selectService('${s.name}')">
+                        <div class="service-icon">${s.icon}</div>
+                        <h3>${s.name}</h3>
+                        <p>${s.description}</p>
+                        <div class="price-tag">Starting ₹${pricing[s.name] || 500}</div>
+                    </div>
+                `).join('');
+
+                // Populate service dropdown
+                const serviceSelect = document.getElementById('service');
+                serviceSelect.innerHTML = '<option value="">Select a service</option>' +
+                    services.map(s => `<option value="${s.name}">${s.name} - ₹${pricing[s.name]}</option>`).join('');
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('servicesGrid').innerHTML = 
+                    '<p style="color: red; text-align: center;">Failed to load services</p>';
+            }
+        }
+
+        // Load technicians
+        async function loadTechnicians() {
+            try {
+                const res = await fetch(`${API}/technicians`);
+                const techs = await res.json();
+                
+                document.getElementById('techniciansGrid').innerHTML = techs.map(t => `
+                    <div class="technician-card">
+                        <div class="tech-header">
+                            <div class="tech-avatar">${t.avatar}</div>
+                            <div class="tech-info">
+                                <h3>${t.name}</h3>
+                                <div class="rating">${'⭐'.repeat(Math.floor(t.rating))} (${t.rating})</div>
+                            </div>
+                        </div>
+                        <div class="tech-details">
+                            <p><strong>Specialty:</strong> <span>${t.specialty}</span></p>
+                            <p><strong>Experience:</strong> <span>${t.experience} years</span></p>
+                            <p><strong>Rate:</strong> <span>₹${t.rate}/hour</span></p>
+                            <p><strong>Completed Jobs:</strong> <span>${t.totalBookings}</span></p>
+                        </div>
+                        <button class="btn" onclick="bookTechnician('${t.name}', '${t.specialty}')">Book ${t.name}</button>
+                    </div>
+                `).join('');
+
+                // Populate technician dropdown
+                const techSelect = document.getElementById('technician');
+                techSelect.innerHTML = '<option value="">Any available technician</option>' +
+                    techs.map(t => `<option value="${t.name}">${t.name} - ${t.specialty}</option>`).join('');
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('techniciansGrid').innerHTML = 
+                    '<p style="color: red; text-align: center;">Failed to load technicians</p>';
+            }
+        }
+
+        // Select service
+        function selectService(serviceName) {
+            document.getElementById('service').value = serviceName;
+            updatePrice();
+            document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Book specific technician
+        function bookTechnician(techName, service) {
+            document.getElementById('technician').value = techName;
+            document.getElementById('service').value = service;
+            updatePrice();
+            document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Update price display
+        function updatePrice() {
+            const service = document.getElementById('service').value;
+            if (service && pricing[service]) {
+                document.getElementById('priceAmount').textContent = pricing[service];
+                document.getElementById('priceDisplay').style.display = 'block';
+            } else {
+                document.getElementById('priceDisplay').style.display = 'none';
+            }
+        }
+
+        // Search by location
+        function searchByLocation() {
+            const location = document.getElementById('locationInput').value;
+            if (location) {
+                alert(`Searching for technicians near: ${location}\n\n(This feature will be fully implemented with geolocation API)`);
+                document.getElementById('technicians').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // View my bookings
+        function viewMyBookings() {
+            const email = prompt('Enter your email to view bookings:');
+            if (email) {
+                fetch(`${API}/bookings/${email}`)
+                    .then(res => res.json())
+                    .then(bookings => {
+                        if (bookings.length === 0) {
+                            alert('No bookings found for this email.');
+                        } else {
+                            let message = `Your Bookings:\n\n`;
+                            bookings.forEach((b, i) => {
+                                message += `${i+1}. ${b.service} - ${b.date} - ₹${b.amount} (${b.status})\n`;
+                            });
+                            alert(message);
+                        }
+                    });
+            }
+        }
+
+        // Handle booking form submission
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                service: document.getElementById('service').value,
+                technician: document.getElementById('technician').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                address: document.getElementById('address').value,
+                details: document.getElementById('details').value
+            };
+
+            try {
+                const response = await fetch(`${API}/bookings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Show success modal
+                    document.getElementById('modalBookingId').textContent = result.bookingId;
+                    document.getElementById('modalService').textContent = formData.service;
+                    document.getElementById('modalDateTime').textContent = `${formData.date} at ${formData.time}`;
+                    document.getElementById('modalAmount').textContent = result.amount;
+                    document.getElementById('successModal').classList.add('active');
+                    
+                    // Reset form
+                    e.target.reset();
+                    document.getElementById('priceDisplay').style.display = 'none';
+                } else {
+                    showError('Booking failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Failed to create booking. Please check your connection.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Confirm Booking & Proceed to Payment';
+            }
+        });
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('successModal').classList.remove('active');
+        }
+
+        // Set minimum date to today
+        const dateInput = document.getElementById('date');
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+
+        // Initialize
+        loadServices();
+        loadTechnicians();
+    </script>
+</body>
+</html>
