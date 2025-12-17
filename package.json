@@ -1,5 +1,5 @@
 {
-  "name": "homeserve-backend",
+  "name": "homeserve-booking",
   "version": "1.0.0",
   "description": "Home Service Booking Backend API",
   "main": "server.js",
