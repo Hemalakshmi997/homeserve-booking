@@ -1,0 +1,18 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "node server.js"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+```
+
+5. Click **"Commit changes"**
+
+**Step 2: Create .nvmrc File (Specify Node Version)**
+
+1. In GitHub, click **"Add file"** → **"Create new file"**
+2. Name it: `.nvmrc`
+3. Paste this single line:
+```
+20
