@@ -24,12 +24,12 @@ let bookings = [];
 let bookingIdCounter = 1;
 
 let services = [
-    { id: 1, name: 'Plumbing Service', description: 'Professional plumbing repairs and installations', price: 150, image: 'plumbing.jpg' },
-    { id: 2, name: 'Electrical Service', description: 'Expert electrical work and repairs', price: 200, image: 'electrical.jpg' },
-    { id: 3, name: 'Cleaning Service', description: 'Deep cleaning for homes and offices', price: 75, image: 'cleaning.jpg' },
-    { id: 4, name: 'Painting Service', description: 'Interior and exterior painting', price: 300, image: 'painting.jpg' },
-    { id: 5, name: 'Carpentry Service', description: 'Custom carpentry and furniture repair', price: 180, image: 'carpentry.jpg' },
-    { id: 6, name: 'AC Repair', description: 'Air conditioning repair and maintenance', price: 120, image: 'ac-repair.jpg' }
+    { id: 1, name: 'Plumbing Service', description: 'Professional plumbing repairs and installations', price: 499, image: 'plumbing.jpg', category: 'plumbing' },
+    { id: 2, name: 'Electrical Service', description: 'Expert electrical work and repairs', price: 599, image: 'electrical.jpg', category: 'electrical' },
+    { id: 3, name: 'Cleaning Service', description: 'Deep cleaning for homes and offices', price: 399, image: 'cleaning.jpg', category: 'cleaning' },
+    { id: 4, name: 'Painting Service', description: 'Interior and exterior painting', price: 899, image: 'painting.jpg', category: 'painting' },
+    { id: 5, name: 'Carpentry Service', description: 'Custom carpentry and furniture repair', price: 699, image: 'carpentry.jpg', category: 'carpentry' },
+    { id: 6, name: 'AC Repair', description: 'Air conditioning repair and maintenance', price: 399, image: 'ac-repair.jpg', category: 'ac' }
 ];
 
 // Root endpoint
