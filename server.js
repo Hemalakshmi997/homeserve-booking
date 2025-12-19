@@ -242,38 +242,3 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`⏰ Started at: ${new Date().toISOString()}`);
 });
-```
-
-5. **Scroll down and click "Commit changes"**
-
----
-
-### **STEP 2: Wait for Render to Redeploy (3-5 minutes)**
-
-1. **Go back to Render dashboard:** https://dashboard.render.com
-2. **Click on your service:** homeserve-booking
-3. **Wait for auto-deployment** (Render will detect the GitHub change)
-4. **Watch the logs** - you'll see it rebuild
-5. **Wait for "Your service is live"**
-
----
-
-### **STEP 3: Test Backend Directly**
-
-**Open these URLs in your browser to test:**
-
-1. **Main endpoint:**
-```
-   https://homeserve-booking.onrender.com
-```
-   Should show API info ✅
-
-2. **Services endpoint:**
-```
-   https://homeserve-booking.onrender.com/api/services
-```
-   Should show: `{"success":true,"services":[...],"count":6}` ✅
-
-3. **Technicians endpoint:**
-```
-   https://homeserve-booking.onrender.com/api/technicians
