@@ -1,244 +1,467 @@
+// ============================================
+// COMPLETE BACKEND CODE - server.js
+// Copy this ENTIRE file and replace your backend server.js
+// ============================================
+
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
-const bodyParser = require('body-parser');
+require('dotenv').config();
 
 const app = express();
 
-// CORS Configuration - Allow requests from your domain
+// ============================================
+// MIDDLEWARE
+// ============================================
 app.use(cors({
-    origin: ['https://hfix.in', 'http://hfix.in', 'https://www.hfix.in', 'http://www.hfix.in'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+  origin: '*', // Allow all origins for now - update after testing
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Handle preflight requests
-app.options('*', cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// ============================================
+// MONGODB CONNECTION
+// ============================================
+const MONGODB_URI = process.env.MONGODB_URI || 'your-mongodb-connection-string';
 
-// Add request logging
-app.use((req, res, next) => {
-    console.log(`${req.method} ${req.path}`);
-    next();
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('✅ MongoDB Connected Successfully'))
+.catch((error) => {
+  console.error('❌ MongoDB Connection Error:', error);
+  process.exit(1);
 });
 
-// In-memory data storage
-let users = [
-    { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Admin User', email: 'admin@homefixsmart.in' },
-    { id: 2, username: 'user', password: 'user123', role: 'customer', name: 'Test User', email: 'user@homefixsmart.in' }
-];
+// ============================================
+// SCHEMAS
+// ============================================
 
-let bookings = [];
-let bookingIdCounter = 1;
+// Service Schema
+const serviceSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  icon: { type: String, required: true },
+  price: { type: String, required: true },
+  category: { type: String, required: true },
+  borderColor: { type: String, default: '#667eea' },
+  subservices: [{
+    name: { type: String, required: true },
+    description: { type: String },
+    price: { type: String },
+    duration: { type: String }
+  }],
+  createdAt: { type: Date, default: Date.now }
+});
 
-let services = [
-    { id: 1, name: 'Plumbing Service', description: 'Expert plumbing repairs, installations, leak fixing', price: 499, category: 'plumbing' },
-    { id: 2, name: 'Electrical Service', description: 'Professional electrical work, repairs, wiring', price: 599, category: 'electrical' },
-    { id: 3, name: 'Cleaning Service', description: 'Deep cleaning for homes and offices', price: 399, category: 'cleaning' },
-    { id: 4, name: 'Painting Service', description: 'Interior and exterior painting', price: 899, category: 'painting' },
-    { id: 5, name: 'Carpentry Service', description: 'Custom carpentry and furniture repair', price: 699, category: 'carpentry' },
-    { id: 6, name: 'AC Repair', description: 'Air conditioning repair and maintenance', price: 399, category: 'ac' }
-];
+const Service = mongoose.model('Service', serviceSchema);
 
-let technicians = [
-    { id: 1, name: 'Rajesh Kumar', specialty: 'Plumbing', experience: 8, rating: 4.8, skills: ['Pipe Repair', 'Leak Fixing', 'Bathroom Fitting'], proficiency: { plumbing: 95, pipeFitting: 92, leakDetection: 90 } },
-    { id: 2, name: 'Amit Sharma', specialty: 'Electrical', experience: 10, rating: 4.9, skills: ['Wiring', 'MCB Repair', 'Fan Installation'], proficiency: { electrical: 97, circuitRepair: 94, safety: 98 } },
-    { id: 3, name: 'Pradeep Singh', specialty: 'AC Service', experience: 7, rating: 4.7, skills: ['AC Repair', 'Gas Filling', 'Installation'], proficiency: { acRepair: 96, installation: 93, pcbRepair: 88 } },
-    { id: 4, name: 'Vikram Patel', specialty: 'Painting', experience: 9, rating: 4.8, skills: ['Interior Paint', 'Exterior Paint', 'Texture'], proficiency: { painting: 94, texture: 91, colorMixing: 96 } },
-    { id: 5, name: 'Suresh Reddy', specialty: 'Carpentry', experience: 12, rating: 4.9, skills: ['Furniture', 'Door Fitting', 'Custom Work'], proficiency: { carpentry: 95, furniture: 97, customDesign: 92 } },
-    { id: 6, name: 'Mohammed Aziz', specialty: 'Cleaning', experience: 6, rating: 4.8, skills: ['Deep Cleaning', 'Sanitization', 'Sofa Clean'], proficiency: { deepCleaning: 98, sanitization: 96, upholstery: 93 } }
-];
+// Booking Schema
+const bookingSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phone: { type: String, required: true },
+  service: { type: String, required: true },
+  subservice: { type: String },
+  date: { type: Date, required: true },
+  address: { type: String, required: true },
+  notes: { type: String },
+  status: { type: String, default: 'pending' },
+  createdAt: { type: Date, default: Date.now }
+});
 
-// Root endpoint
+const Booking = mongoose.model('Booking', bookingSchema);
+
+// ============================================
+// ROUTES
+// ============================================
+
+// Health Check
 app.get('/', (req, res) => {
-    res.json({ 
-        message: 'Home Fix Smart Services API',
-        status: 'success',
-        version: '1.0.0',
-        timestamp: new Date().toISOString(),
-        endpoints: {
-            services: 'GET /api/services',
-            technicians: 'GET /api/technicians',
-            login: 'POST /api/login',
-            booking: 'POST /api/booking',
-            userBookings: 'GET /api/bookings/user/:userId',
-            adminBookings: 'GET /api/admin/bookings',
-            stats: 'GET /api/admin/stats'
-        }
-    });
+  res.json({ 
+    message: '🏠 Home Fix Smart Services API',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      services: '/api/services',
+      bookings: '/api/bookings',
+      seed: '/api/seed'
+    }
+  });
 });
 
-// Health check
 app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'healthy', 
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
+  res.json({ 
+    status: 'OK', 
+    message: 'Backend is running',
+    timestamp: new Date().toISOString(),
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    mongooseState: mongoose.connection.readyState
+  });
+});
+
+// ============================================
+// SERVICES ROUTES
+// ============================================
+
+// GET all services
+app.get('/api/services', async (req, res) => {
+  try {
+    console.log('📥 Fetching all services...');
+    const services = await Service.find().sort({ createdAt: -1 });
+    
+    console.log(`✅ Found ${services.length} services`);
+    res.json({
+      success: true,
+      count: services.length,
+      data: services
     });
+  } catch (error) {
+    console.error('❌ Error fetching services:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching services',
+      error: error.message 
+    });
+  }
 });
 
-// Get all services
-app.get('/api/services', (req, res) => {
-    console.log('Services requested');
-    res.json({ success: true, services: services, count: services.length });
-});
-
-// Get all technicians
-app.get('/api/technicians', (req, res) => {
-    console.log('Technicians requested');
-    res.json({ success: true, technicians: technicians, count: technicians.length });
-});
-
-// Login
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    console.log('Login attempt:', username);
+// GET single service
+app.get('/api/services/:id', async (req, res) => {
+  try {
+    const service = await Service.findById(req.params.id);
     
-    const user = users.find(u => u.username === username && u.password === password);
-    
-    if (user) {
-        const token = 'token_' + user.id + '_' + Date.now();
-        res.json({ 
-            success: true, 
-            message: 'Login successful',
-            user: { id: user.id, name: user.name, email: user.email, role: user.role },
-            token: token
-        });
-    } else {
-        res.status(401).json({ success: false, message: 'Invalid credentials' });
-    }
-});
-
-// Register (optional)
-app.post('/api/register', (req, res) => {
-    const { username, password, name, email, phone } = req.body;
-    
-    if (users.find(u => u.username === username)) {
-        return res.status(400).json({ success: false, message: 'Username already exists' });
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found'
+      });
     }
     
-    const newUser = {
-        id: users.length + 1,
-        username,
-        password,
-        name,
-        email,
-        phone,
-        role: 'customer'
-    };
-    
-    users.push(newUser);
-    res.json({ success: true, message: 'Registration successful', user: { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role } });
+    res.json({
+      success: true,
+      data: service
+    });
+  } catch (error) {
+    console.error('❌ Error fetching service:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching service',
+      error: error.message 
+    });
+  }
 });
 
-// Create booking
-app.post('/api/booking', (req, res) => {
-    const { userId, serviceId, serviceName, date, time, address, phone, amount, customerName, email } = req.body;
-    console.log('New booking:', serviceName, 'by', customerName);
+// CREATE service
+app.post('/api/services', async (req, res) => {
+  try {
+    const service = new Service(req.body);
+    await service.save();
     
-    const booking = {
-        id: bookingIdCounter++,
-        userId: userId || 1,
-        customerName: customerName || 'Guest',
-        email: email || 'guest@example.com',
-        serviceId,
-        serviceName,
-        date,
-        time,
-        address,
-        phone,
-        amount,
-        status: 'pending',
-        createdAt: new Date().toISOString()
-    };
-    
-    bookings.push(booking);
-    res.json({ success: true, message: 'Booking created successfully', booking: booking });
+    console.log('✅ Service created:', service.title);
+    res.status(201).json({
+      success: true,
+      data: service
+    });
+  } catch (error) {
+    console.error('❌ Error creating service:', error);
+    res.status(400).json({ 
+      success: false,
+      message: 'Error creating service',
+      error: error.message 
+    });
+  }
 });
 
-// Get user bookings
-app.get('/api/bookings/user/:userId', (req, res) => {
-    const userId = parseInt(req.params.userId);
-    console.log('Fetching bookings for user:', userId);
-    const userBookings = bookings.filter(b => b.userId === userId);
-    res.json({ success: true, bookings: userBookings, count: userBookings.length });
-});
-
-// Get booking by ID
-app.get('/api/booking/:bookingId', (req, res) => {
-    const bookingId = parseInt(req.params.bookingId);
-    const booking = bookings.find(b => b.id === bookingId);
+// UPDATE service
+app.put('/api/services/:id', async (req, res) => {
+  try {
+    const service = await Service.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
     
-    if (booking) {
-        res.json({ success: true, booking: booking });
-    } else {
-        res.status(404).json({ success: false, message: 'Booking not found' });
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found'
+      });
     }
-});
-
-// Cancel booking
-app.put('/api/booking/:bookingId/cancel', (req, res) => {
-    const bookingId = parseInt(req.params.bookingId);
-    const booking = bookings.find(b => b.id === bookingId);
     
-    if (booking) {
-        booking.status = 'cancelled';
-        res.json({ success: true, message: 'Booking cancelled', booking: booking });
-    } else {
-        res.status(404).json({ success: false, message: 'Booking not found' });
-    }
+    res.json({
+      success: true,
+      data: service
+    });
+  } catch (error) {
+    console.error('❌ Error updating service:', error);
+    res.status(400).json({ 
+      success: false,
+      message: 'Error updating service',
+      error: error.message 
+    });
+  }
 });
 
-// Admin: Get all bookings
-app.get('/api/admin/bookings', (req, res) => {
-    console.log('Admin fetching all bookings');
-    res.json({ success: true, bookings: bookings, count: bookings.length });
-});
-
-// Admin: Update booking
-app.put('/api/admin/booking/:bookingId', (req, res) => {
-    const bookingId = parseInt(req.params.bookingId);
-    const { status } = req.body;
-    const booking = bookings.find(b => b.id === bookingId);
+// DELETE service
+app.delete('/api/services/:id', async (req, res) => {
+  try {
+    const service = await Service.findByIdAndDelete(req.params.id);
     
-    if (booking) {
-        booking.status = status;
-        res.json({ success: true, message: 'Booking updated', booking: booking });
-    } else {
-        res.status(404).json({ success: false, message: 'Booking not found' });
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found'
+      });
     }
+    
+    res.json({
+      success: true,
+      message: 'Service deleted successfully'
+    });
+  } catch (error) {
+    console.error('❌ Error deleting service:', error);
+    res.status(400).json({ 
+      success: false,
+      message: 'Error deleting service',
+      error: error.message 
+    });
+  }
 });
 
-// Admin: Get statistics
-app.get('/api/admin/stats', (req, res) => {
-    const stats = {
-        totalBookings: bookings.length,
-        pendingBookings: bookings.filter(b => b.status === 'pending').length,
-        completedBookings: bookings.filter(b => b.status === 'completed').length,
-        cancelledBookings: bookings.filter(b => b.status === 'cancelled').length,
-        totalRevenue: bookings.filter(b => b.status === 'completed').reduce((sum, b) => sum + (b.amount || 0), 0),
-        totalUsers: users.filter(u => u.role === 'customer').length
-    };
-    res.json({ success: true, stats: stats });
+// ============================================
+// BOOKINGS ROUTES
+// ============================================
+
+// GET all bookings
+app.get('/api/bookings', async (req, res) => {
+  try {
+    const bookings = await Booking.find().sort({ createdAt: -1 });
+    
+    res.json({
+      success: true,
+      count: bookings.length,
+      data: bookings
+    });
+  } catch (error) {
+    console.error('❌ Error fetching bookings:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching bookings',
+      error: error.message 
+    });
+  }
 });
 
-// Error handling
+// CREATE booking
+app.post('/api/bookings', async (req, res) => {
+  try {
+    const booking = new Booking(req.body);
+    await booking.save();
+    
+    console.log('✅ Booking created:', booking._id);
+    res.status(201).json({
+      success: true,
+      message: 'Booking created successfully',
+      data: booking
+    });
+  } catch (error) {
+    console.error('❌ Error creating booking:', error);
+    res.status(400).json({ 
+      success: false,
+      message: 'Error creating booking',
+      error: error.message 
+    });
+  }
+});
+
+// ============================================
+// SEED DATABASE
+// ============================================
+app.post('/api/seed', async (req, res) => {
+  try {
+    // Clear existing services
+    await Service.deleteMany({});
+    
+    // Sample services data
+    const services = [
+      {
+        title: 'Plumbing Services',
+        description: 'Professional leak detection, fixing, and pipe maintenance for your home',
+        icon: '🔧',
+        price: '₹499 onwards',
+        category: 'plumbing',
+        borderColor: '#3b82f6',
+        subservices: [
+          { name: 'Leak Detection & Repair', description: 'Identify and fix water leaks quickly', price: '₹499', duration: '1-2 hours' },
+          { name: 'Pipe Installation', description: 'New pipe fitting and installation', price: '₹799', duration: '2-3 hours' },
+          { name: 'Drain Cleaning', description: 'Clear blocked drains and pipes', price: '₹599', duration: '1 hour' },
+          { name: 'Tap & Faucet Repair', description: 'Fix dripping taps and faucets', price: '₹399', duration: '30 mins' },
+          { name: 'Toilet Repair', description: 'Fix toilet flush and tank issues', price: '₹699', duration: '1-2 hours' }
+        ]
+      },
+      {
+        title: 'Electrical Services',
+        description: 'Complete electrical repairs and safety inspections by certified electricians',
+        icon: '⚡',
+        price: '₹599 onwards',
+        category: 'electrical',
+        borderColor: '#8b5cf6',
+        subservices: [
+          { name: 'Wiring Repair', description: 'Fix faulty electrical wiring safely', price: '₹699', duration: '2-3 hours' },
+          { name: 'Switch & Socket Installation', description: 'Install new switches and outlets', price: '₹599', duration: '1 hour' },
+          { name: 'Fan Installation', description: 'Install ceiling and wall fans', price: '₹799', duration: '1-2 hours' },
+          { name: 'Light Fixture Installation', description: 'Install lights and chandeliers', price: '₹899', duration: '1-2 hours' },
+          { name: 'Safety Inspection', description: 'Complete electrical safety check', price: '₹1299', duration: '2-3 hours' },
+          { name: 'MCB & Fuse Box Repair', description: 'Fix circuit breakers and fuse boxes', price: '₹999', duration: '1-2 hours' }
+        ]
+      },
+      {
+        title: 'Cleaning Services',
+        description: 'Deep cleaning solutions using eco-friendly products',
+        icon: '🧹',
+        price: '₹399 onwards',
+        category: 'cleaning',
+        borderColor: '#10b981',
+        subservices: [
+          { name: 'Deep Home Cleaning', description: 'Thorough cleaning of entire home', price: '₹1299', duration: '4-5 hours' },
+          { name: 'Kitchen Deep Cleaning', description: 'Complete kitchen sanitization', price: '₹799', duration: '2-3 hours' },
+          { name: 'Bathroom Cleaning', description: 'Deep bathroom cleaning & sanitization', price: '₹599', duration: '1-2 hours' },
+          { name: 'Sofa Cleaning', description: 'Professional sofa and upholstery cleaning', price: '₹899', duration: '2 hours' },
+          { name: 'Carpet Cleaning', description: 'Deep carpet cleaning service', price: '₹699', duration: '1-2 hours' }
+        ]
+      },
+      {
+        title: 'Painting Services',
+        description: 'Interior and exterior painting with premium quality Asian Paints',
+        icon: '🎨',
+        price: '₹899 onwards',
+        category: 'painting',
+        borderColor: '#ef4444',
+        subservices: [
+          { name: 'Interior Wall Painting', description: 'Paint interior walls professionally', price: '₹899', duration: '1 day' },
+          { name: 'Exterior Painting', description: 'Weather-resistant exterior painting', price: '₹1299', duration: '2 days' },
+          { name: 'Texture Painting', description: 'Decorative texture painting', price: '₹1599', duration: '2 days' },
+          { name: 'Wood Polishing', description: 'Polish doors and furniture', price: '₹799', duration: '1 day' },
+          { name: 'Waterproofing', description: 'Wall waterproofing treatment', price: '₹1999', duration: '1-2 days' }
+        ]
+      },
+      {
+        title: 'Carpentry Services',
+        description: 'Custom carpentry work, furniture assembly, and expert repairs',
+        icon: '🔨',
+        price: '₹699 onwards',
+        category: 'carpentry',
+        borderColor: '#f59e0b',
+        subservices: [
+          { name: 'Furniture Assembly', description: 'Assemble new furniture items', price: '₹699', duration: '1-2 hours' },
+          { name: 'Door Repair', description: 'Fix door hinges and locks', price: '₹799', duration: '1-2 hours' },
+          { name: 'Cabinet Installation', description: 'Install kitchen and storage cabinets', price: '₹1299', duration: '3-4 hours' },
+          { name: 'Window Repair', description: 'Fix window frames and fittings', price: '₹899', duration: '1-2 hours' },
+          { name: 'Custom Furniture', description: 'Build custom furniture pieces', price: '₹2999', duration: '3-5 days' }
+        ]
+      },
+      {
+        title: 'AC Repair & Maintenance',
+        description: 'Air conditioning installation, repair, and regular maintenance service',
+        icon: '❄️',
+        price: '₹499 onwards',
+        category: 'ac',
+        borderColor: '#06b6d4',
+        subservices: [
+          { name: 'AC Service & Cleaning', description: 'Complete AC cleaning and gas check', price: '₹499', duration: '1 hour' },
+          { name: 'AC Installation', description: 'Install new air conditioner', price: '₹1999', duration: '2-3 hours' },
+          { name: 'AC Repair', description: 'Fix cooling and other AC issues', price: '₹799', duration: '1-2 hours' },
+          { name: 'AC Gas Refilling', description: 'Refill refrigerant gas', price: '₹1299', duration: '1 hour' },
+          { name: 'AC Uninstallation', description: 'Safely remove AC unit', price: '₹699', duration: '1 hour' }
+        ]
+      }
+    ];
+    
+    // Insert services
+    const insertedServices = await Service.insertMany(services);
+    
+    console.log('✅ Database seeded successfully');
+    res.json({
+      success: true,
+      message: 'Database seeded successfully with 6 services',
+      count: insertedServices.length,
+      data: insertedServices
+    });
+  } catch (error) {
+    console.error('❌ Error seeding database:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error seeding database',
+      error: error.message 
+    });
+  }
+});
+
+// ============================================
+// 404 HANDLER
+// ============================================
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+    path: req.originalUrl,
+    availableRoutes: [
+      'GET /',
+      'GET /health',
+      'GET /api/services',
+      'GET /api/services/:id',
+      'POST /api/services',
+      'PUT /api/services/:id',
+      'DELETE /api/services/:id',
+      'GET /api/bookings',
+      'POST /api/bookings',
+      'POST /api/seed'
+    ]
+  });
+});
+
+// ============================================
+// ERROR HANDLER
+// ============================================
 app.use((err, req, res, next) => {
-    console.error('Error:', err.stack);
-    res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
+  console.error('❌ Server Error:', err);
+  res.status(500).json({
+    success: false,
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+  });
 });
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Endpoint not found' });
+// ============================================
+// START SERVER
+// ============================================
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`
+  ==========================================
+  🚀 Home Fix Smart Services API
+  ==========================================
+  🌍 Server running on port ${PORT}
+  📊 Environment: ${process.env.NODE_ENV || 'development'}
+  💾 Database: ${mongoose.connection.readyState === 1 ? '✅ Connected' : '⏳ Connecting...'}
+  🔗 URL: http://localhost:${PORT}
+  ==========================================
+  `);
 });
 
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Backend API running on port ${PORT}`);
-    console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`⏰ Started at: ${new Date().toISOString()}`);
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.error('❌ Unhandled Rejection:', err);
+});
+
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM received, shutting down gracefully');
+  process.exit(0);
 });
