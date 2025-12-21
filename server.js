@@ -11,21 +11,36 @@ require('dotenv').config();
 const app = express();
 
 // ============================================
-// MIDDLEWARE
+// CORS CONFIGURATION - FIXED FOR BROWSER!
 // ============================================
-app.use(cors());
-app.options('*', cors());
+const corsOptions = {
+  origin: function (origin, callback) {
+    callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  exposedHeaders: ['Content-Length', 'Content-Type'],
+  maxAge: 86400
+};
 
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+// Additional CORS headers
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
   next();
 });
 
+// ============================================
+// MIDDLEWARE
+// ============================================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -117,17 +132,15 @@ app.get('/api/services', async (req, res) => {
 });
 
 // ============================================
-// SEED DATABASE - CHANGED TO GET SO YOU CAN USE BROWSER!
+// SEED DATABASE - CHANGED TO GET
 // ============================================
 app.get('/api/seed', async (req, res) => {
   try {
     console.log('🌱 Seeding database...');
     
-    // Clear existing services
     await Service.deleteMany({});
     console.log('🗑️ Cleared old services');
     
-    // Sample services data
     const services = [
       {
         title: 'Plumbing Services',
@@ -222,7 +235,6 @@ app.get('/api/seed', async (req, res) => {
       }
     ];
     
-    // Insert services
     const insertedServices = await Service.insertMany(services);
     
     console.log('✅ Database seeded successfully');
@@ -313,4 +325,7 @@ process.on('SIGTERM', () => {
   console.log('👋 Shutting down gracefully');
   process.exit(0);
 });
+```
+
+---
 
