@@ -1,5 +1,6 @@
 // ============================================
 // COMPLETE BACKEND CODE - server.js
+// COPY THIS ENTIRE FILE
 // ============================================
 
 const express = require('express');
@@ -110,9 +111,9 @@ app.get('/api/services', async (req, res) => {
 });
 
 // ============================================
-// SEED DATABASE - THIS IS THE IMPORTANT ONE!
+// SEED DATABASE - CHANGED TO GET SO YOU CAN USE BROWSER!
 // ============================================
-app.post('/api/seed', async (req, res) => {
+app.get('/api/seed', async (req, res) => {
   try {
     console.log('🌱 Seeding database...');
     
@@ -133,7 +134,8 @@ app.post('/api/seed', async (req, res) => {
           { name: 'Leak Detection & Repair', description: 'Identify and fix water leaks quickly', price: '₹499', duration: '1-2 hours' },
           { name: 'Pipe Installation', description: 'New pipe fitting and installation', price: '₹799', duration: '2-3 hours' },
           { name: 'Drain Cleaning', description: 'Clear blocked drains and pipes', price: '₹599', duration: '1 hour' },
-          { name: 'Tap & Faucet Repair', description: 'Fix dripping taps and faucets', price: '₹399', duration: '30 mins' }
+          { name: 'Tap & Faucet Repair', description: 'Fix dripping taps and faucets', price: '₹399', duration: '30 mins' },
+          { name: 'Toilet Repair', description: 'Fix toilet flush and tank issues', price: '₹699', duration: '1-2 hours' }
         ]
       },
       {
@@ -147,7 +149,9 @@ app.post('/api/seed', async (req, res) => {
           { name: 'Wiring Repair', description: 'Fix faulty electrical wiring safely', price: '₹699', duration: '2-3 hours' },
           { name: 'Switch Installation', description: 'Install new switches and outlets', price: '₹599', duration: '1 hour' },
           { name: 'Fan Installation', description: 'Install ceiling and wall fans', price: '₹799', duration: '1-2 hours' },
-          { name: 'Safety Inspection', description: 'Complete electrical safety check', price: '₹1299', duration: '2-3 hours' }
+          { name: 'Light Fixture Installation', description: 'Install lights and chandeliers', price: '₹899', duration: '1-2 hours' },
+          { name: 'Safety Inspection', description: 'Complete electrical safety check', price: '₹1299', duration: '2-3 hours' },
+          { name: 'MCB Repair', description: 'Fix circuit breakers and fuse boxes', price: '₹999', duration: '1-2 hours' }
         ]
       },
       {
@@ -159,26 +163,30 @@ app.post('/api/seed', async (req, res) => {
         borderColor: '#10b981',
         subservices: [
           { name: 'Deep Home Cleaning', description: 'Thorough cleaning of entire home', price: '₹1299', duration: '4-5 hours' },
-          { name: 'Kitchen Cleaning', description: 'Complete kitchen sanitization', price: '₹799', duration: '2-3 hours' },
-          { name: 'Bathroom Cleaning', description: 'Deep bathroom cleaning', price: '₹599', duration: '1-2 hours' }
+          { name: 'Kitchen Deep Cleaning', description: 'Complete kitchen sanitization', price: '₹799', duration: '2-3 hours' },
+          { name: 'Bathroom Cleaning', description: 'Deep bathroom cleaning & sanitization', price: '₹599', duration: '1-2 hours' },
+          { name: 'Sofa Cleaning', description: 'Professional sofa cleaning', price: '₹899', duration: '2 hours' },
+          { name: 'Carpet Cleaning', description: 'Deep carpet cleaning service', price: '₹699', duration: '1-2 hours' }
         ]
       },
       {
         title: 'Painting Services',
-        description: 'Interior and exterior painting with premium quality paints',
+        description: 'Interior and exterior painting with premium quality Asian Paints',
         icon: '🎨',
         price: '₹899 onwards',
         category: 'painting',
         borderColor: '#ef4444',
         subservices: [
-          { name: 'Interior Painting', description: 'Paint interior walls professionally', price: '₹899', duration: '1 day' },
+          { name: 'Interior Wall Painting', description: 'Paint interior walls professionally', price: '₹899', duration: '1 day' },
           { name: 'Exterior Painting', description: 'Weather-resistant exterior painting', price: '₹1299', duration: '2 days' },
-          { name: 'Texture Painting', description: 'Decorative texture painting', price: '₹1599', duration: '2 days' }
+          { name: 'Texture Painting', description: 'Decorative texture painting', price: '₹1599', duration: '2 days' },
+          { name: 'Wood Polishing', description: 'Polish doors and furniture', price: '₹799', duration: '1 day' },
+          { name: 'Waterproofing', description: 'Wall waterproofing treatment', price: '₹1999', duration: '1-2 days' }
         ]
       },
       {
         title: 'Carpentry Services',
-        description: 'Custom carpentry work, furniture assembly, and repairs',
+        description: 'Custom carpentry work, furniture assembly, and expert repairs',
         icon: '🔨',
         price: '₹699 onwards',
         category: 'carpentry',
@@ -186,20 +194,24 @@ app.post('/api/seed', async (req, res) => {
         subservices: [
           { name: 'Furniture Assembly', description: 'Assemble new furniture items', price: '₹699', duration: '1-2 hours' },
           { name: 'Door Repair', description: 'Fix door hinges and locks', price: '₹799', duration: '1-2 hours' },
+          { name: 'Cabinet Installation', description: 'Install kitchen and storage cabinets', price: '₹1299', duration: '3-4 hours' },
+          { name: 'Window Repair', description: 'Fix window frames and fittings', price: '₹899', duration: '1-2 hours' },
           { name: 'Custom Furniture', description: 'Build custom furniture pieces', price: '₹2999', duration: '3-5 days' }
         ]
       },
       {
         title: 'AC Repair & Maintenance',
-        description: 'Air conditioning installation, repair, and maintenance',
+        description: 'Air conditioning installation, repair, and regular maintenance service',
         icon: '❄️',
         price: '₹499 onwards',
         category: 'ac',
         borderColor: '#06b6d4',
         subservices: [
-          { name: 'AC Service', description: 'Complete AC cleaning and gas check', price: '₹499', duration: '1 hour' },
+          { name: 'AC Service & Cleaning', description: 'Complete AC cleaning and gas check', price: '₹499', duration: '1 hour' },
           { name: 'AC Installation', description: 'Install new air conditioner', price: '₹1999', duration: '2-3 hours' },
-          { name: 'AC Repair', description: 'Fix cooling and other issues', price: '₹799', duration: '1-2 hours' }
+          { name: 'AC Repair', description: 'Fix cooling and other AC issues', price: '₹799', duration: '1-2 hours' },
+          { name: 'AC Gas Refilling', description: 'Refill refrigerant gas', price: '₹1299', duration: '1 hour' },
+          { name: 'AC Uninstallation', description: 'Safely remove AC unit', price: '₹699', duration: '1 hour' }
         ]
       }
     ];
@@ -222,6 +234,52 @@ app.post('/api/seed', async (req, res) => {
       error: error.message 
     });
   }
+});
+
+// ============================================
+// GET SINGLE SERVICE
+// ============================================
+app.get('/api/services/:id', async (req, res) => {
+  try {
+    const service = await Service.findById(req.params.id);
+    
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: service
+    });
+  } catch (error) {
+    console.error('❌ Error fetching service:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching service',
+      error: error.message 
+    });
+  }
+});
+
+// ============================================
+// 404 HANDLER
+// ============================================
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+    path: req.originalUrl,
+    availableRoutes: [
+      'GET /',
+      'GET /health',
+      'GET /api/services',
+      'GET /api/services/:id',
+      'GET /api/seed'
+    ]
+  });
 });
 
 // ============================================
