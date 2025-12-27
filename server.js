@@ -325,7 +325,3 @@ process.on('SIGTERM', () => {
   console.log('👋 Shutting down gracefully');
   process.exit(0);
 });
-```
-
----
-
