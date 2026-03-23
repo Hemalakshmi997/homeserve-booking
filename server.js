@@ -311,6 +311,62 @@ async function initializeData() {
   }
 }
 
+// ══════════════════════════════════════
+// ADMIN ROUTES — paste before app.listen
+// ══════════════════════════════════════
+
+// GET ALL BOOKINGS (admin)
+app.get('/api/admin/bookings', async (req, res) => {
+  try {
+    const bookings = await Booking.find({}).sort({ createdAt: -1 });
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch bookings', error: error.message });
+  }
+});
+
+// GET ALL CUSTOMERS (admin)
+app.get('/api/admin/customers', async (req, res) => {
+  try {
+    const customers = await User.find({}).select('-password').sort({ createdAt: -1 });
+    res.json(customers);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch customers', error: error.message });
+  }
+});
+
+// ASSIGN TECHNICIAN TO BOOKING (admin)
+app.put('/api/admin/bookings/:id/assign', async (req, res) => {
+  try {
+    const { technicianId, status } = req.body;
+    const booking = await Booking.findByIdAndUpdate(
+      req.params.id,
+      { technicianId: String(technicianId), status: status || 'confirmed' },
+      { new: true }
+    );
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    console.log('✅ Technician assigned to booking:', req.params.id);
+    res.json({ message: 'Technician assigned successfully', booking });
+  } catch (error) {
+    console.error('Assign error:', error);
+    res.status(500).json({ message: 'Failed to assign technician', error: error.message });
+  }
+});
+
+// GET ADMIN STATS
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    const totalBookings  = await Booking.countDocuments();
+    const totalCustomers = await User.countDocuments();
+    const totalTechs     = await Technician.countDocuments();
+    const completed      = await Booking.find({ status: 'completed' });
+    const totalRevenue   = completed.reduce((s, b) => s + (b.totalAmount || 0), 0);
+    res.json({ totalBookings, totalCustomers, totalTechs, totalRevenue });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch stats', error: error.message });
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 HOME FIX SMART SERVICES - ONE CALL TOTAL HOME CARE`);
@@ -318,3 +374,4 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 module.exports = app;
+
