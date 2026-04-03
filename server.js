@@ -373,5 +373,59 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🌐 API URL: http://localhost:${PORT}`);
 });
 
+
+// ── ADMIN SCHEMA & LOGIN ──
+const adminSchema = new mongoose.Schema({
+  username: { type: String, unique: true },
+  password: String,
+  email: String,
+  role: { type: String, default: 'admin' }
+});
+const Admin = mongoose.model('Admin', adminSchema);
+
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password)
+      return res.status(400).json({ message: 'Username and password required' });
+    const admin = await Admin.findOne({ username });
+    if (!admin) return res.status(401).json({ message: 'Invalid credentials' });
+    const isValid = await bcrypt.compare(password, admin.password);
+    if (!isValid) return res.status(401).json({ message: 'Invalid credentials' });
+    const token = jwt.sign({ adminId: admin._id, role: 'admin' }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ message: 'Login successful', token });
+  } catch (error) {
+    res.status(500).json({ message: 'Login failed', error: error.message });
+  }
+});
+
+app.post('/api/admin/technicians', async (req, res) => {
+  try {
+    const { name, phone, city, specialization, experience } = req.body;
+    if (!name || !phone || !city || !specialization)
+      return res.status(400).json({ message: 'All fields required' });
+    const exists = await Technician.findOne({ phone });
+    if (exists) return res.status(400).json({ message: 'Phone already registered' });
+    const tech = new Technician({
+      name, phone, city, specialization,
+      experience: experience || '1 year',
+      rating: 5.0, completedJobs: 0, isAvailable: true
+    });
+    await tech.save();
+    res.json({ message: 'Technician added successfully', technician: tech });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to add technician', error: error.message });
+  }
+});
+
+app.delete('/api/admin/technicians/:id', async (req, res) => {
+  try {
+    await Technician.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Technician deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to delete', error: error.message });
+  }
+});
+
 module.exports = app;
 
