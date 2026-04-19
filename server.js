@@ -6,6 +6,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
+const http = require("http");
+const { Server } = require("socket.io");
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
 app.use(cors());
 app.use(express.json());
 
@@ -367,7 +371,7 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 HOME FIX SMART SERVICES - ONE CALL TOTAL HOME CARE`);
   console.log(`🌐 API URL: http://localhost:${PORT}`);
@@ -425,6 +429,50 @@ app.delete('/api/admin/technicians/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Failed to delete', error: error.message });
   }
+});
+
+
+// CHAT SCHEMA
+const chatSchema = new mongoose.Schema({
+  bookingId: String,
+  senderId: String,
+  senderName: String,
+  senderRole: String,
+  message: String,
+  createdAt: { type: Date, default: Date.now }
+});
+const Chat = mongoose.model('Chat', chatSchema);
+
+// CHAT API
+app.get('/api/chat/:bookingId', async (req, res) => {
+  try {
+    const messages = await Chat.find({ bookingId: req.params.bookingId }).sort({ createdAt: 1 });
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch messages' });
+  }
+});
+
+// SOCKET.IO
+io.on('connection', (socket) => {
+  socket.on('join_booking', (bookingId) => {
+    socket.join(bookingId);
+  });
+  socket.on('send_message', async (data) => {
+    try {
+      const msg = new Chat({
+        bookingId: data.bookingId,
+        senderId: data.senderId,
+        senderName: data.senderName,
+        senderRole: data.senderRole,
+        message: data.message
+      });
+      await msg.save();
+      io.to(data.bookingId).emit('receive_message', msg);
+    } catch (err) {
+      console.error('Chat error:', err);
+    }
+  });
 });
 
 module.exports = app;
