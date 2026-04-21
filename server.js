@@ -197,6 +197,18 @@ app.post('/api/bookings', auth, async (req, res) => {
   }
 });
 
+
+// GET SINGLE BOOKING BY ID (for chat)
+app.get('/api/bookings/:id', async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    res.json(booking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching booking' });
+  }
+});
+
 app.get('/api/bookings', auth, async (req, res) => {
   try {
     const bookings = await Booking.find({ userId: req.user.userId }).sort({ createdAt: -1 });
